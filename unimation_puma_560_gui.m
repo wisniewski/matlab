@@ -1,3 +1,17 @@
+%% Documentation
+% Robotic Arm Unimation PUMA 560
+% Project by Mariusz Wisniewski
+% Software: MatLab R2011a
+% E-mail: 254019@stud.umk.pl
+% website: www.mariuszbonifacy.pl
+%
+% Forward & Inverse kinematics calculated in MatLab, based on book
+% "Introduction to Robotics. Machanics and Control" by John Craig (3rd
+% edition)
+%
+% Code based on lab exercises, www.sky-engin.jp (figures and animations)
+%
+% Other educational materials: lecture by PhD Slawomir Mandra and Internet
 %% Begin initialization code - DO NOT EDIT
 function varargout = unimation_puma_560(varargin)
 gui_Singleton = 1;
