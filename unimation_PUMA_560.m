@@ -63,11 +63,7 @@ plot3([cs(1,1) cs(1,4)], [cs(2,1) cs(2,4)], [cs(3,1) cs(3,4)],'r', 'LineWidth', 
 text(cs(1,1), cs(2,1), cs(3,1), name, 'FontSize', 20)
 end
 %%
-function base00(H)
-%% dimensions
-radius = 2;
-height = -6;
-side_count = 26;
+function cylinder(radius, height, side_count, H)
 %% vertices
 n_side = side_count;
 for i_ver=1:n_side
@@ -115,63 +111,7 @@ set(h2,'FaceLighting','phong','EdgeLighting','phong');
 set(h2,'EraseMode','normal');
 end
 %%
-function base01(H)
-%% dimensions
-radius = 2;
-height = 2;
-side_count = 20;
-%% vertices
-n_side = side_count;
-for i_ver=1:n_side
-    VertexData_0(i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),0];
-    VertexData_0(n_side+i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),height];
-end
-n_ver = 2*n_side;
-%% DH matrix - moves
-R = H(1:3,1:3);
-x = H(1,4);
-y = H(2,4);
-z = H(3,4);
-v = [x y z];
-
-for i_ver=1:n_ver
-    VertexData(i_ver,:) = v + VertexData_0(i_ver,:)*R';
-end
-%% side patches
-for i_pat=1:n_side-1
-    Index_Patch1(i_pat,:) = [i_pat,i_pat+1,i_pat+1+n_side,i_pat+n_side];
-end
-Index_Patch1(n_side,:) = [n_side,1,1+n_side,2*n_side];
-%% side patches data
-for i_pat=1:n_side
-    PatchDate1_X(:,i_pat) = VertexData(Index_Patch1(i_pat,:),1);
-    PatchDate1_Y(:,i_pat) = VertexData(Index_Patch1(i_pat,:),2);
-    PatchDate1_Z(:,i_pat) = VertexData(Index_Patch1(i_pat,:),3);
-end
-%% draw side patches
-h1 = patch(PatchDate1_X,PatchDate1_Y,PatchDate1_Z,'y');
-set(h1,'FaceLighting','phong','EdgeLighting','phong');
-set(h1,'EraseMode','normal');
-%% bottom Patches
-Index_Patch2(1,:) = [1:n_side];
-Index_Patch2(2,:) = [n_side+1:2*n_side];
-%% bottom patches data
-for i_pat=1:2
-    PatchData2_X(:,i_pat) = VertexData(Index_Patch2(i_pat,:),1);
-    PatchData2_Y(:,i_pat) = VertexData(Index_Patch2(i_pat,:),2);
-    PatchData2_Z(:,i_pat) = VertexData(Index_Patch2(i_pat,:),3);
-end
-%% draw bottom patches
-h2 = patch(PatchData2_X,PatchData2_Y,PatchData2_Z,'y');
-set(h2,'FaceLighting','phong','EdgeLighting','phong');
-set(h2,'EraseMode','normal');
-end
-%%
-function arm02(H)
-%% dimensions
-Lx = 6;
-Ly = -2;
-Lz = 2;
+function block(Lx, Ly, Lz, H)
 %% data that we need from DH matrix to rotate block
 x = H(1,4);
 y = H(2,4);
@@ -210,163 +150,9 @@ for i_pat=1:n_pat
     PatchData_Z(:,i_pat) = VertexData(Index_Patch(i_pat,:),3);
 end
 %% draw patches
-figure(1);
 h = patch(PatchData_X,PatchData_Y,PatchData_Z,'y');
 set(h,'FaceLighting','phong','EdgeLighting','phong');
 set(h,'EraseMode','normal');
-end
-%%
-function arm03(H)
-%% dimensions
-Lx = 2;
-Ly = 5;
-Lz = 2;
-%% data that we need from DH matrix to rotate block
-x = H(1,4);
-y = H(2,4);
-z = H(3,4);
-v = [x y z];
-R = H(1:3,1:3);
-%% vertices
-VertexData_0 = [Lx*ones(8,1),Ly*ones(8,1),Lz*ones(8,1)]...
-    .*[0,0,0;
-    1,0,0;
-    0,1,0;
-    0,0,1;
-    1,1,0;
-    0,1,1;
-    1,0,1;
-    1,1,1];
-
-n_ver = 8;
-for i_ver=1:n_ver
-    VertexData(i_ver,:) = v + VertexData_0(i_ver,:)*R';
-end
-%% patches
-Index_Patch = ...
-    [1,2,5,3;
-    1,3,6,4;
-    1,4,7,2;
-    4,7,8,6;
-    2,5,8,7;
-    3,6,8,5];
-%% patches data
-n_pat = 6;
-for i_pat=1:n_pat
-    
-    PatchData_X(:,i_pat) = VertexData(Index_Patch(i_pat,:),1);
-    PatchData_Y(:,i_pat) = VertexData(Index_Patch(i_pat,:),2);
-    PatchData_Z(:,i_pat) = VertexData(Index_Patch(i_pat,:),3);
-end
-%% draw patches
-figure(1);
-h = patch(PatchData_X,PatchData_Y,PatchData_Z,'y');
-set(h,'FaceLighting','phong','EdgeLighting','phong');
-set(h,'EraseMode','normal');
-end
-%%
-function arm04(H)
-%% dimensions
-radius = 0.4;
-height = -1;
-side_count = 20;
-%% vertices
-n_side = side_count;
-for i_ver=1:n_side
-    VertexData_0(i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),0];
-    VertexData_0(n_side+i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),height];
-end
-n_ver = 2*n_side;
-%% DH matrix - moves
-R = H(1:3,1:3);
-x = H(1,4);
-y = H(2,4);
-z = H(3,4);
-v = [x y z];
-
-for i_ver=1:n_ver
-    VertexData(i_ver,:) = v + VertexData_0(i_ver,:)*R';
-end
-%% side patches
-for i_pat=1:n_side-1
-    Index_Patch1(i_pat,:) = [i_pat,i_pat+1,i_pat+1+n_side,i_pat+n_side];
-end
-Index_Patch1(n_side,:) = [n_side,1,1+n_side,2*n_side];
-%% side patches data
-for i_pat=1:n_side
-    PatchDate1_X(:,i_pat) = VertexData(Index_Patch1(i_pat,:),1);
-    PatchDate1_Y(:,i_pat) = VertexData(Index_Patch1(i_pat,:),2);
-    PatchDate1_Z(:,i_pat) = VertexData(Index_Patch1(i_pat,:),3);
-end
-%% draw side patches
-h1 = patch(PatchDate1_X,PatchDate1_Y,PatchDate1_Z,'y');
-set(h1,'FaceLighting','phong','EdgeLighting','phong');
-set(h1,'EraseMode','normal');
-%% bottom Patches
-Index_Patch2(1,:) = [1:n_side];
-Index_Patch2(2,:) = [n_side+1:2*n_side];
-%% bottom patches data
-for i_pat=1:2
-    PatchData2_X(:,i_pat) = VertexData(Index_Patch2(i_pat,:),1);
-    PatchData2_Y(:,i_pat) = VertexData(Index_Patch2(i_pat,:),2);
-    PatchData2_Z(:,i_pat) = VertexData(Index_Patch2(i_pat,:),3);
-end
-%% draw bottom patches
-h2 = patch(PatchData2_X,PatchData2_Y,PatchData2_Z,'y');
-set(h2,'FaceLighting','phong','EdgeLighting','phong');
-set(h2,'EraseMode','normal');
-end
-%%
-function arm05(H)
-%% dimensions
-radius = 0.1;
-height = 0.5;
-side_count = 20;
-%% vertices
-n_side = side_count;
-for i_ver=1:n_side
-    VertexData_0(i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),0];
-    VertexData_0(n_side+i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),height];
-end
-n_ver = 2*n_side;
-%% DH matrix - moves
-R = H(1:3,1:3);
-x = H(1,4);
-y = H(2,4);
-z = H(3,4);
-v = [x y z];
-
-for i_ver=1:n_ver
-    VertexData(i_ver,:) = v + VertexData_0(i_ver,:)*R';
-end
-%% side patches
-for i_pat=1:n_side-1
-    Index_Patch1(i_pat,:) = [i_pat,i_pat+1,i_pat+1+n_side,i_pat+n_side];
-end
-Index_Patch1(n_side,:) = [n_side,1,1+n_side,2*n_side];
-%% side patches data
-for i_pat=1:n_side
-    PatchDate1_X(:,i_pat) = VertexData(Index_Patch1(i_pat,:),1);
-    PatchDate1_Y(:,i_pat) = VertexData(Index_Patch1(i_pat,:),2);
-    PatchDate1_Z(:,i_pat) = VertexData(Index_Patch1(i_pat,:),3);
-end
-%% draw side patches
-h1 = patch(PatchDate1_X,PatchDate1_Y,PatchDate1_Z,'y');
-set(h1,'FaceLighting','phong','EdgeLighting','phong');
-set(h1,'EraseMode','normal');
-%% bottom Patches
-Index_Patch2(1,:) = [1:n_side];
-Index_Patch2(2,:) = [n_side+1:2*n_side];
-%% bottom patches data
-for i_pat=1:2
-    PatchData2_X(:,i_pat) = VertexData(Index_Patch2(i_pat,:),1);
-    PatchData2_Y(:,i_pat) = VertexData(Index_Patch2(i_pat,:),2);
-    PatchData2_Z(:,i_pat) = VertexData(Index_Patch2(i_pat,:),3);
-end
-%% draw bottom patches
-h2 = patch(PatchData2_X,PatchData2_Y,PatchData2_Z,'y');
-set(h2,'FaceLighting','phong','EdgeLighting','phong');
-set(h2,'EraseMode','normal');
 end
 %%
 function effector06(H)
@@ -413,12 +199,12 @@ draw_coordinate_system(h04, '4');
 draw_coordinate_system(h05, '5');
 draw_coordinate_system(h06, '6');
 %% draw our figures (base, arm, effector)
-base00(h00);
-base01(h01);
-arm02(h02);
-arm03(h03);
-arm04(h04);
-arm05(h05)
+cylinder(2, -6, 26, h00);
+cylinder(2, 2, 26, h01);
+block(6, -2, 2, h02);
+block(2, 5, 2, h03);
+cylinder(0.4, -1, 20, h04);
+cylinder(0.1, 0.5, 20, h05)
 effector06(h06);
 end
 %%
@@ -561,7 +347,7 @@ end
 %%
 function [x,y,z]=calculate_letter
 %% vertical lines | |
-z = 1:0.1:9;
+z = 2:0.1:8;
 for i=1:1:length(z)
     x(i) = 4;
     y(i) = 4;
@@ -584,7 +370,7 @@ for i=1:1:length(xb)
 end
 y = [y yb];
 %% finally data for whole letter |\/|
-zb = linspace(9,5,40) % I want ony 40 elements from 9 to 5
-zc = linspace(5,9,41) % and now I want 41 elements
+zb = linspace(8,5,40); % I want ony 40 elements from 9 to 5
+zc = linspace(5,8,41); % and now I want 41 elements
 z = [z zb zc]; %now I have 243 elements in [z], [y] & [x]
 end
