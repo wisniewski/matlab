@@ -16,11 +16,11 @@
 function varargout = unimation_puma_560(varargin)
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @unimation_puma_560_OpeningFcn, ...
-                   'gui_OutputFcn',  @unimation_puma_560_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @unimation_puma_560_OpeningFcn, ...
+    'gui_OutputFcn',  @unimation_puma_560_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -46,7 +46,7 @@ handles.slider_theta6 = 0;
 guidata(hObject, handles);
 end
 %% --- Outputs from this function are returned to the command line.
-function varargout = unimation_puma_560_OutputFcn(hObject, eventdata, handles) 
+function varargout = unimation_puma_560_OutputFcn(hObject, eventdata, handles)
 %% Get default command line output from handles structure
 varargout{1} = handles.output;
 end
@@ -100,11 +100,7 @@ plot3([cs(1,1) cs(1,4)], [cs(2,1) cs(2,4)], [cs(3,1) cs(3,4)],'r', 'LineWidth', 
 text(cs(1,1), cs(2,1), cs(3,1), name, 'FontSize', 20)
 end
 %%
-function base00(H)
-%% dimensions
-radius = 2;
-height = -6;
-side_count = 26;
+function cylinder(radius, height, side_count, H)
 %% vertices
 n_side = side_count;
 for i_ver=1:n_side
@@ -152,63 +148,7 @@ set(h2,'FaceLighting','phong','EdgeLighting','phong');
 set(h2,'EraseMode','normal');
 end
 %%
-function base01(H)
-%% dimensions
-radius = 2;
-height = 2;
-side_count = 20;
-%% vertices
-n_side = side_count;
-for i_ver=1:n_side
-    VertexData_0(i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),0];
-    VertexData_0(n_side+i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),height];
-end
-n_ver = 2*n_side;
-%% DH matrix - moves
-R = H(1:3,1:3);
-x = H(1,4);
-y = H(2,4);
-z = H(3,4);
-v = [x y z];
-
-for i_ver=1:n_ver
-    VertexData(i_ver,:) = v + VertexData_0(i_ver,:)*R';
-end
-%% side patches
-for i_pat=1:n_side-1
-    Index_Patch1(i_pat,:) = [i_pat,i_pat+1,i_pat+1+n_side,i_pat+n_side];
-end
-Index_Patch1(n_side,:) = [n_side,1,1+n_side,2*n_side];
-%% side patches data
-for i_pat=1:n_side
-    PatchDate1_X(:,i_pat) = VertexData(Index_Patch1(i_pat,:),1);
-    PatchDate1_Y(:,i_pat) = VertexData(Index_Patch1(i_pat,:),2);
-    PatchDate1_Z(:,i_pat) = VertexData(Index_Patch1(i_pat,:),3);
-end
-%% draw side patches
-h1 = patch(PatchDate1_X,PatchDate1_Y,PatchDate1_Z,'y');
-set(h1,'FaceLighting','phong','EdgeLighting','phong');
-set(h1,'EraseMode','normal');
-%% bottom Patches
-Index_Patch2(1,:) = [1:n_side];
-Index_Patch2(2,:) = [n_side+1:2*n_side];
-%% bottom patches data
-for i_pat=1:2
-    PatchData2_X(:,i_pat) = VertexData(Index_Patch2(i_pat,:),1);
-    PatchData2_Y(:,i_pat) = VertexData(Index_Patch2(i_pat,:),2);
-    PatchData2_Z(:,i_pat) = VertexData(Index_Patch2(i_pat,:),3);
-end
-%% draw bottom patches
-h2 = patch(PatchData2_X,PatchData2_Y,PatchData2_Z,'y');
-set(h2,'FaceLighting','phong','EdgeLighting','phong');
-set(h2,'EraseMode','normal');
-end
-%%
-function arm02(H)
-%% dimensions
-Lx = 6;
-Ly = -2;
-Lz = 2;
+function block(Lx, Ly, Lz, H)
 %% data that we need from DH matrix to rotate block
 x = H(1,4);
 y = H(2,4);
@@ -250,158 +190,6 @@ end
 h = patch(PatchData_X,PatchData_Y,PatchData_Z,'y');
 set(h,'FaceLighting','phong','EdgeLighting','phong');
 set(h,'EraseMode','normal');
-end
-%%
-function arm03(H)
-%% dimensions
-Lx = 2;
-Ly = 5;
-Lz = 2;
-%% data that we need from DH matrix to rotate block
-x = H(1,4);
-y = H(2,4);
-z = H(3,4);
-v = [x y z];
-R = H(1:3,1:3);
-%% vertices
-VertexData_0 = [Lx*ones(8,1),Ly*ones(8,1),Lz*ones(8,1)]...
-    .*[0,0,0;
-    1,0,0;
-    0,1,0;
-    0,0,1;
-    1,1,0;
-    0,1,1;
-    1,0,1;
-    1,1,1];
-
-n_ver = 8;
-for i_ver=1:n_ver
-    VertexData(i_ver,:) = v + VertexData_0(i_ver,:)*R';
-end
-%% patches
-Index_Patch = ...
-    [1,2,5,3;
-    1,3,6,4;
-    1,4,7,2;
-    4,7,8,6;
-    2,5,8,7;
-    3,6,8,5];
-%% patches data
-n_pat = 6;
-for i_pat=1:n_pat
-    
-    PatchData_X(:,i_pat) = VertexData(Index_Patch(i_pat,:),1);
-    PatchData_Y(:,i_pat) = VertexData(Index_Patch(i_pat,:),2);
-    PatchData_Z(:,i_pat) = VertexData(Index_Patch(i_pat,:),3);
-end
-%% draw patches
-h = patch(PatchData_X,PatchData_Y,PatchData_Z,'y');
-set(h,'FaceLighting','phong','EdgeLighting','phong');
-set(h,'EraseMode','normal');
-end
-%%
-function arm04(H)
-%% dimensions
-radius = 0.4;
-height = -1;
-side_count = 20;
-%% vertices
-n_side = side_count;
-for i_ver=1:n_side
-    VertexData_0(i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),0];
-    VertexData_0(n_side+i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),height];
-end
-n_ver = 2*n_side;
-%% DH matrix - moves
-R = H(1:3,1:3);
-x = H(1,4);
-y = H(2,4);
-z = H(3,4);
-v = [x y z];
-
-for i_ver=1:n_ver
-    VertexData(i_ver,:) = v + VertexData_0(i_ver,:)*R';
-end
-%% side patches
-for i_pat=1:n_side-1
-    Index_Patch1(i_pat,:) = [i_pat,i_pat+1,i_pat+1+n_side,i_pat+n_side];
-end
-Index_Patch1(n_side,:) = [n_side,1,1+n_side,2*n_side];
-%% side patches data
-for i_pat=1:n_side
-    PatchDate1_X(:,i_pat) = VertexData(Index_Patch1(i_pat,:),1);
-    PatchDate1_Y(:,i_pat) = VertexData(Index_Patch1(i_pat,:),2);
-    PatchDate1_Z(:,i_pat) = VertexData(Index_Patch1(i_pat,:),3);
-end
-%% draw side patches
-h1 = patch(PatchDate1_X,PatchDate1_Y,PatchDate1_Z,'y');
-set(h1,'FaceLighting','phong','EdgeLighting','phong');
-set(h1,'EraseMode','normal');
-%% bottom Patches
-Index_Patch2(1,:) = [1:n_side];
-Index_Patch2(2,:) = [n_side+1:2*n_side];
-%% bottom patches data
-for i_pat=1:2
-    PatchData2_X(:,i_pat) = VertexData(Index_Patch2(i_pat,:),1);
-    PatchData2_Y(:,i_pat) = VertexData(Index_Patch2(i_pat,:),2);
-    PatchData2_Z(:,i_pat) = VertexData(Index_Patch2(i_pat,:),3);
-end
-%% draw bottom patches
-h2 = patch(PatchData2_X,PatchData2_Y,PatchData2_Z,'y');
-set(h2,'FaceLighting','phong','EdgeLighting','phong');
-set(h2,'EraseMode','normal');
-end
-%%
-function arm05(H)
-%% dimensions
-radius = 0.1;
-height = 0.5;
-side_count = 20;
-%% vertices
-n_side = side_count;
-for i_ver=1:n_side
-    VertexData_0(i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),0];
-    VertexData_0(n_side+i_ver,:) = [radius*cos(2*pi/n_side*i_ver),radius*sin(2*pi/n_side*i_ver),height];
-end
-n_ver = 2*n_side;
-%% DH matrix - moves
-R = H(1:3,1:3);
-x = H(1,4);
-y = H(2,4);
-z = H(3,4);
-v = [x y z];
-
-for i_ver=1:n_ver
-    VertexData(i_ver,:) = v + VertexData_0(i_ver,:)*R';
-end
-%% side patches
-for i_pat=1:n_side-1
-    Index_Patch1(i_pat,:) = [i_pat,i_pat+1,i_pat+1+n_side,i_pat+n_side];
-end
-Index_Patch1(n_side,:) = [n_side,1,1+n_side,2*n_side];
-%% side patches data
-for i_pat=1:n_side
-    PatchDate1_X(:,i_pat) = VertexData(Index_Patch1(i_pat,:),1);
-    PatchDate1_Y(:,i_pat) = VertexData(Index_Patch1(i_pat,:),2);
-    PatchDate1_Z(:,i_pat) = VertexData(Index_Patch1(i_pat,:),3);
-end
-%% draw side patches
-h1 = patch(PatchDate1_X,PatchDate1_Y,PatchDate1_Z,'y');
-set(h1,'FaceLighting','phong','EdgeLighting','phong');
-set(h1,'EraseMode','normal');
-%% bottom Patches
-Index_Patch2(1,:) = [1:n_side];
-Index_Patch2(2,:) = [n_side+1:2*n_side];
-%% bottom patches data
-for i_pat=1:2
-    PatchData2_X(:,i_pat) = VertexData(Index_Patch2(i_pat,:),1);
-    PatchData2_Y(:,i_pat) = VertexData(Index_Patch2(i_pat,:),2);
-    PatchData2_Z(:,i_pat) = VertexData(Index_Patch2(i_pat,:),3);
-end
-%% draw bottom patches
-h2 = patch(PatchData2_X,PatchData2_Y,PatchData2_Z,'y');
-set(h2,'FaceLighting','phong','EdgeLighting','phong');
-set(h2,'EraseMode','normal');
 end
 %%
 function effector06(H)
@@ -448,12 +236,12 @@ draw_coordinate_system(h04, '4');
 draw_coordinate_system(h05, '5');
 draw_coordinate_system(h06, '6');
 %% draw our figures (base, arm, effector)
-base00(h00);
-base01(h01);
-arm02(h02);
-arm03(h03);
-arm04(h04);
-arm05(h05)
+cylinder(2, -6, 26, h00);
+cylinder(2, 2, 26, h01);
+block(6, -2, 2, h02);
+block(2, 5, 2, h03);
+cylinder(0.4, -1, 20, h04);
+cylinder(0.1, 0.5, 20, h05)
 effector06(h06);
 end
 %%
@@ -638,10 +426,10 @@ end
 %% --- Executes on slider movement.
 function slider_theta1_Callback(hObject, eventdata, handles)
 %% get values
-handles.slider_theta1=floor(get(hObject,'Value')); 
-set(handles.window_theta1,'String',floor(get(hObject,'Value'))); 
+handles.slider_theta1=floor(get(hObject,'Value'));
+set(handles.window_theta1,'String',floor(get(hObject,'Value')));
 %% update number in white box
-guidata(hObject, handles); 
+guidata(hObject, handles);
 %% change arm position
 theta1 = handles.slider_theta1;
 theta2 = handles.slider_theta2;
@@ -662,10 +450,10 @@ end
 %% --- Executes on slider movement.
 function slider_theta2_Callback(hObject, eventdata, handles)
 %% get values
-handles.slider_theta2=floor(get(hObject,'Value')); 
-set(handles.window_theta2,'String',floor(get(hObject,'Value'))); 
+handles.slider_theta2=floor(get(hObject,'Value'));
+set(handles.window_theta2,'String',floor(get(hObject,'Value')));
 %% update number in white box
-guidata(hObject, handles); 
+guidata(hObject, handles);
 %% change arm position
 theta1 = handles.slider_theta1;
 theta2 = handles.slider_theta2;
@@ -686,10 +474,10 @@ end
 %% --- Executes on slider movement.
 function slider_theta3_Callback(hObject, eventdata, handles)
 %% get values
-handles.slider_theta3=floor(get(hObject,'Value')); 
-set(handles.window_theta3,'String',floor(get(hObject,'Value'))); 
+handles.slider_theta3=floor(get(hObject,'Value'));
+set(handles.window_theta3,'String',floor(get(hObject,'Value')));
 %% update number in white box
-guidata(hObject, handles); 
+guidata(hObject, handles);
 %% change arm position
 theta1 = handles.slider_theta1;
 theta2 = handles.slider_theta2;
@@ -710,10 +498,10 @@ end
 %% --- Executes on slider movement.
 function slider_theta4_Callback(hObject, eventdata, handles)
 %% get values
-handles.slider_theta4=floor(get(hObject,'Value')); 
-set(handles.window_theta4,'String',floor(get(hObject,'Value'))); 
+handles.slider_theta4=floor(get(hObject,'Value'));
+set(handles.window_theta4,'String',floor(get(hObject,'Value')));
 %% update number in white box
-guidata(hObject, handles); 
+guidata(hObject, handles);
 %% change arm position
 theta1 = handles.slider_theta1;
 theta2 = handles.slider_theta2;
@@ -734,10 +522,10 @@ end
 %% --- Executes on slider movement.
 function slider_theta5_Callback(hObject, eventdata, handles)
 %% get values
-handles.slider_theta5=floor(get(hObject,'Value')); 
-set(handles.window_theta5,'String',floor(get(hObject,'Value'))); 
+handles.slider_theta5=floor(get(hObject,'Value'));
+set(handles.window_theta5,'String',floor(get(hObject,'Value')));
 %% update number in white box
-guidata(hObject, handles); 
+guidata(hObject, handles);
 %% change arm position
 theta1 = handles.slider_theta1;
 theta2 = handles.slider_theta2;
@@ -758,10 +546,10 @@ end
 %% --- Executes on slider movement.
 function slider_theta6_Callback(hObject, eventdata, handles)
 %% get values
-handles.slider_theta6=floor(get(hObject,'Value')); 
-set(handles.window_theta6,'String',floor(get(hObject,'Value'))); 
+handles.slider_theta6=floor(get(hObject,'Value'));
+set(handles.window_theta6,'String',floor(get(hObject,'Value')));
 %% update number in white box
-guidata(hObject, handles); 
+guidata(hObject, handles);
 %% change arm position
 theta1 = handles.slider_theta1;
 theta2 = handles.slider_theta2;
@@ -809,6 +597,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
+%% --- Executes during object creation, after setting all properties.
+function window_theta6_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+end
 %% blank callbacks of windows
 function window_theta1_Callback(hObject, eventdata, handles)
 end
@@ -822,9 +616,3 @@ function window_theta5_Callback(hObject, eventdata, handles)
 end
 function window_theta6_Callback(hObject, eventdata, handles)
 end
-%% --- Executes during object creation, after setting all properties.
-function window_theta6_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-end 
